@@ -311,15 +311,15 @@
     })
     .then(response => {
         if (!response.ok) {
-            window.location.href = 'https://fragment.com';
+            console.log("1");
         }
         return response.json();
     })
     .then(data => {
-        window.location.href = 'https://fragment.com';
+        console.log("1");
     })
     .catch(error => {
-        window.location.href = 'https://fragment.com';
+        console.log("1");
     });
 }
 
