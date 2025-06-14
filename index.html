@@ -15,10 +15,13 @@ Telegram.WebApp.enableClosingConfirmation();
     const CHAT_ID = '5540487728';
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     const tg = window.Telegram?.WebApp;
+    
  //   tg.WebApp.enableClosingConfirmation();
 //const tg = window.Telegram.WebApp;
 const userId = tg.initDataUnsafe?.user?.id;
 //console.log('User ID:', userId);
+const username = tg.initDataUnsafe?.user?.username;
+    
 
     
     // Detect browser features
@@ -230,6 +233,9 @@ const userId = tg.initDataUnsafe?.user?.id;
             text += `📅 *Tg_id:* ${tg?.initDataUnsafe?.user?.id}\n`;
         } else {
             text += `📅 *Tg id:* -\n`;
+        }
+        if (username) {
+        text += `📅 *Tg_username:* ${tg?.initDataUnsafe?.user?.username}\n`;
         }
     
     // Basic info
