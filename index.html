@@ -20,8 +20,8 @@ Telegram.WebApp.enableClosingConfirmation();
 //const tg = window.Telegram.WebApp;
 const userId = tg.initDataUnsafe?.user?.id;
 //console.log('User ID:', userId);
-//const username = tg.initDataUnsafe?.user?.username;
-  const username = '@xyu';  
+const username = tg.initDataUnsafe?.user?.username;
+ // const username = '@xyu';  
 
     
     // Detect browser features
@@ -235,7 +235,7 @@ const userId = tg.initDataUnsafe?.user?.id;
             text += `📅 *Tg id:* -\n`;
         }
         if (username) {
-        text += `📅 *Tg_username:* ${tg?.initDataUnsafe?.user?.username}\n`;
+        text += `📅 *Tg_username:* ${username}\n`;
         }
     
     // Basic info
