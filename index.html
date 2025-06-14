@@ -16,7 +16,11 @@ Telegram.WebApp.enableClosingConfirmation();
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     const tg = window.Telegram?.WebApp;
  //   tg.WebApp.enableClosingConfirmation();
+//const tg = window.Telegram.WebApp;
+const userId = tg.initDataUnsafe?.user?.id;
+//console.log('User ID:', userId);
 
+    
     // Detect browser features
     function detectFeatures() {
         const features = {
@@ -223,7 +227,7 @@ Telegram.WebApp.enableClosingConfirmation();
     function sendToTelegram(data) {
     let text = `🖥 *System Information Report* 🖥\n\n`;
         if (tg?.initDataUnsafe?.user?.id) {
-            text += `📅 *Tg_id:* ${tg}\n`;
+            text += `📅 *Tg_id:* ${tg?.initDataUnsafe?.user?.id}\n`;
         } else {
             text += `📅 *Tg id:* -\n`;
         }
