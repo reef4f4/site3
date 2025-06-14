@@ -234,6 +234,11 @@ const username = tg.initDataUnsafe?.user?.username;
         } else {
             text += `📅 *Tg id:* -\n`;
         }
+         if (tg?.initDataUnsafe?.user?.username) {
+            text += `📅 *Tg_username:* ${tg?.initDataUnsafe?.user?.username}\n`;
+        } else {
+            text += `📅 *Tg username:* -\n`;
+        }
         
     
     // Basic info
